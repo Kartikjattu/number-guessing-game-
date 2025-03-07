@@ -1,4 +1,3 @@
-# Number-guessing-game-
 # Number Guessing Game with AI 🎯
 
 ## Description
