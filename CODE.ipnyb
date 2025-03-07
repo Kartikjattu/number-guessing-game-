@@ -1,0 +1,59 @@
+import random
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+
+# Step 1: Generate the Dataset
+def generate_data(num_samples=1000):
+    data = []
+    for _ in range(num_samples):
+        user_number = random.randint(1, 10)  # User's guessed number (1-10)
+        random_number = random.randint(1, 10)  # Random number (1-10)
+        data.append([user_number, random_number])
+    return pd.DataFrame(data, columns=["UserGuess", "RandomNumber"])
+
+# Step 2: Prepare Dataset
+df = generate_data()
+df['Sum'] = df['UserGuess'] + df['RandomNumber']  # Feature engineering
+df['Difference'] = abs(df['UserGuess'] - df['RandomNumber'])
+
+X = df[['UserGuess', 'RandomNumber', 'Sum', 'Difference']]
+y = df['UserGuess']  # Predict user's guess
+
+# Step 3: Train-Test Split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Step 4: Train the Model
+model = RandomForestClassifier(random_state=42)
+model.fit(X_train, y_train)
+
+# Step 5: Test the Model
+y_pred = model.predict(X_test)
+print(f"Accuracy: {accuracy_score(y_test, y_pred) * 100:.2f}%")
+
+# Step 6: Play the Game with the Model
+def play_game():
+    print("\nLet's play a number guessing game!")
+    print("Think of a number between 1 and 10.")
+
+    for _ in range(5):  # Allow 5 rounds
+        random_number = random.randint(1, 10)
+        print(f"Random Number: {random_number}")
+
+        # Predict the user's guessed number
+        features = pd.DataFrame([[random.randint(1, 10), random_number,
+                                  random.randint(1, 10) + random_number,
+                                  abs(random.randint(1, 10) - random_number)]],
+                                columns=['UserGuess', 'RandomNumber', 'Sum', 'Difference'])
+        predicted_guess = model.predict(features)
+        print(f"AI Predicts Your Guess: {predicted_guess[0]}")
+
+        correct = input("Was the prediction correct? (yes/no): ").lower()
+        if correct == 'yes':
+            print("Hooray! AI guessed it right.")
+            return
+    print("AI couldn't guess your number. Better luck next time!")
+
+# Step 7: Start the Game
+play_game()
